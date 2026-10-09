@@ -1,27 +1,22 @@
+using OmniReserve.Api.Middlewares;
 using OmniReserve.Application;
-using OmniReserve.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
-
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-
 builder.Services.AddApplication();
-builder.Services.AddInfrastructure(builder.Configuration);
 
 var app = builder.Build();
 
+app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI(c =>
-    {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "OmniReserve.Api v1");
-    });
+    app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();
