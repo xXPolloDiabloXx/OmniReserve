@@ -1,20 +1,32 @@
 using MediatR;
+using OmniReserve.Application.Common.Interfaces;
 
 namespace OmniReserve.Application.Rooms.Queries.GetRoomById;
 
 public class GetRoomByIdQueryHandler : IRequestHandler<GetRoomByIdQuery, RoomResponseDto>
 {
-    public Task<RoomResponseDto> Handle(GetRoomByIdQuery request, CancellationToken cancellationToken)
-    {
-        // Simulación de respuesta desde base de datos
-        var roomDto = new RoomResponseDto(
-            request.RoomId,
-            "101-A",
-            "Suite",
-            150.00m,
-            true
-        );
+    private readonly IRoomRepository _roomRepository;
 
-        return Task.FromResult(roomDto);
+    public GetRoomByIdQueryHandler(IRoomRepository roomRepository)
+    {
+        _roomRepository = roomRepository;
+    }
+
+    public async Task<RoomResponseDto> Handle(GetRoomByIdQuery request, CancellationToken cancellationToken)
+    {
+        var room = await _roomRepository.GetByIdAsync(request.RoomId);
+
+        if (room is null)
+        {
+            throw new Exception("Room not found");
+        }
+
+        return new RoomResponseDto(
+            room.Id,
+            room.Number,
+            room.Type.ToString(),
+            room.PricePerNight,
+            room.IsAvailable
+        );
     }
 }
